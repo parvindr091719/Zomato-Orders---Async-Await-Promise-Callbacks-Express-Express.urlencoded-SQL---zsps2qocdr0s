@@ -1,7 +1,6 @@
 
 var mysql = require('mysql');
 
-
 // var con = mysql.createConnection({
 //     host: "localhost",
 //     user: "root",
@@ -13,7 +12,7 @@ var mysql = require('mysql');
 var con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "12345",
+    password: "ayush123",
     database: "test",
     multipleStatements: true
 });
