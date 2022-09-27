@@ -6,35 +6,44 @@ const port = 8080
 // Parse JSON bodies (as sent by API clients)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const connection = require('./connector');
+const connection = require('./connector')
 
-
-app.get(`/api/orders`,async(req,res)=>{
-  const {limit,offset} = req.query;
-
-  if(!limit && !offset || !Number.isInteger(limit) || !Number.isInteger(offset)) {
-   const qry = `SELECT * FROM ORDERS LIMIT 10 OFFSET 0`;
-   connection.query(qry,(err,response)=>{
-      if(err) {
-         console.log("not response from db due to ",err);
-      }else{
-         res.status(200).json(response);
-      }
-   })
+app.get('/api/orders', async (req, res) => {
+  let limit = 10;
+  let offset = 0;
+  if (req.query.limit && req.query.offset) {
+    limit = req.query.limit;
+    offset = req.query.offset;
+  }
+  else if (req.query.limit) {
+    limit = req.query.limit;
+  }
+  else if (req.query.offset) {
+    offset = req.query.offset;
   }
 
-  else{
-   const qry = `SELECT * FROM ORDERS LIMIT ${limit} OFFSET ${offset}`;
-   connection.query(qry,(err,response)=>{
-      if(err) {
-         console.log("no response from db due to ",err);
+  // let regexPattern = /^-?[0-9]+$/;
+  let regexPattern = /^\+?(0|[1-9]\d*)$/; //  for checking Negative value
 
-      }else{
-         res.status(200).json(response);
-      }
-   })
+  // check if the passed number is integer or not
+  let resultLimit = regexPattern.test(limit);
+  let resultOffset = regexPattern.test(offset);
+
+  if (!resultLimit) {
+    limit = 10;
   }
-});
+  if (!resultOffset) {
+    offset = 0;
+  }
+
+  const q = `SELECT * FROM orders LIMIT ${limit} OFFSET ${offset}`;
+  connection.query(q, (err, response) => {
+    if (err) {
+      return console.log(err);
+    }
+    return res.status(200).send(response);
+  })
+})
 
 app.listen(port, () => console.log(`App listening on port ${port}!`))
 
